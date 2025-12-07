@@ -17,49 +17,53 @@ np.random.seed(42)
 n_customers = 200
 
 # Customer Acquisition Cost (CAC) in USD
-cac = np.random.normal(loc=150, scale=50, size=n_customers)
-cac = np.clip(cac, 50, 300)  # realistic range
+cac = np.clip(np.random.normal(150, 50, n_customers), 50, 300)
 
 # Customer Lifetime Value (CLV) in USD
-clv = 2 * cac + np.random.normal(loc=0, scale=50, size=n_customers)
-clv = np.clip(clv, 50, 700)
+clv = np.clip(2 * cac + np.random.normal(0, 50, n_customers), 50, 700)
 
 # Create DataFrame
 data = pd.DataFrame({"CAC": cac, "CLV": clv})
 
 # -----------------------------
-# 3. Create scatterplot
+# 3. Create figure (exact 512x512 px)
 # -----------------------------
-plt.figure(figsize=(8, 8))  # 512x512 pixels at 64 dpi
-scatter = sns.scatterplot(
+fig, ax = plt.subplots(figsize=(512/100, 512/100), dpi=100)  # 5.12 x 5.12 inches @ 100 dpi
+
+# Scatterplot
+sns.scatterplot(
     data=data,
     x="CAC",
     y="CLV",
-    palette="viridis",
-    s=100,
     color="dodgerblue",
+    s=100,
     edgecolor="w",
-    alpha=0.8
+    alpha=0.8,
+    ax=ax
 )
 
-# Add titles and labels
-plt.title("Customer Lifetime Value vs Acquisition Cost", fontsize=16, weight='bold')
-plt.xlabel("Customer Acquisition Cost (USD)", fontsize=14)
-plt.ylabel("Customer Lifetime Value (USD)", fontsize=14)
-
-# Optional: add regression line
+# Regression line
 sns.regplot(
     data=data,
     x="CAC",
     y="CLV",
     scatter=False,
     color="orange",
-    line_kws={"linewidth":2, "linestyle":"--"}
+    line_kws={"linewidth":2, "linestyle":"--"},
+    ax=ax
 )
 
+# Titles and labels
+ax.set_title("Customer Lifetime Value vs Acquisition Cost", fontsize=16, weight='bold')
+ax.set_xlabel("Customer Acquisition Cost (USD)", fontsize=14)
+ax.set_ylabel("Customer Lifetime Value (USD)", fontsize=14)
+
+# Remove margins to ensure exact 512x512 px
+ax.set_position([0, 0, 1, 1])  # full canvas
+fig.canvas.draw()  # render everything
+
 # -----------------------------
-# 4. Save the chart
+# 4. Save figure
 # -----------------------------
-plt.tight_layout()
-plt.savefig("chart.png", dpi=64, bbox_inches='tight')  # 512x512 pixels
+fig.savefig("chart.png", dpi=100)  # exactly 512x512 pixels
 plt.close()
